@@ -1,28 +1,21 @@
 {
   "schemaVersion": 1,
-  "id": "starter",
+  "id": "epic_fantasy",
   "version": "${version}",
 
-  "name": "Fabric Starter",
-  "icon": "assets/starter/icon.png",
-  "description": "Template for starting out Fabric mods",
-  "license": "MIT",
-  "contact": {
-    "sources": "https://github.com/CottonMC/FabricStarter"
-  },
+  "name": "Valoeghese's Epic Fantasy",
+  "description": "Epic Mod",
+  "license": "All Rights Reserved",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "io.github.cottonmc.starter.FabricStarter"
+      "valoeghese.epic.abstraction.Initialise"
     ]
   },
   "mixins": [
-    "mixins.starter.json"
+    "epic_fantasy.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.4.0"
-  },
-  "custom": {
-    "modmenu:api": true
   }
 }

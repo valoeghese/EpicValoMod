@@ -1,5 +1,10 @@
+import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
+import org.gradle.api.internal.artifacts.dependencies.DefaultSelfResolvingDependency
+import org.gradle.api.internal.file.FileCollectionInternal
+import org.gradle.internal.component.external.model.DefaultModuleComponentIdentifier
+
 plugins {
-	id "fabric-loom" version "0.2.7-SNAPSHOT"
+	id "fabric-loom" version "0.4-SNAPSHOT"
 	id "maven-publish"
 	id "com.jfrog.artifactory" version "4.15.2"
 }
@@ -25,9 +30,19 @@ repositories {
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.minecraft_version}+build.${project.yarn_build}:v2"
+
+	def id = new DefaultModuleComponentIdentifier(DefaultModuleIdentifier.newId("com.mojang", "mojmap"), "20w29a")
+
+    mappings(new DefaultSelfResolvingDependency(id, project.files("./mappings.jar") as FileCollectionInternal) {
+        public String getGroup() { return "com.mojang"; }
+        public String getName() { return "mojmap"; }
+        public String getVersion() { return "20w29a"; }
+    })
+
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	modImplementation "tk.valoeghese:ZoesteriaConfig:1.3.4"
+	include "tk.valoeghese:ZoesteriaConfig:1.3.4"
 	compileOnly "com.google.code.findbugs:jsr305:3.0.2"
 }
 
