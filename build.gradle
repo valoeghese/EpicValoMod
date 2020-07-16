@@ -4,7 +4,7 @@ import org.gradle.api.internal.file.FileCollectionInternal
 import org.gradle.internal.component.external.model.DefaultModuleComponentIdentifier
 
 plugins {
-	id "fabric-loom" version "0.4-SNAPSHOT"
+	id "fabric-loom" version "15f62d0" //"0.4-SNAPSHOT"
 	id "maven-publish"
 	id "com.jfrog.artifactory" version "4.15.2"
 }
@@ -33,11 +33,14 @@ dependencies {
 
 	def id = new DefaultModuleComponentIdentifier(DefaultModuleIdentifier.newId("com.mojang", "mojmap"), "20w29a")
 
-    mappings(new DefaultSelfResolvingDependency(id, project.files("./mappings.jar") as FileCollectionInternal) {
-        public String getGroup() { return "com.mojang"; }
-        public String getName() { return "mojmap"; }
-        public String getVersion() { return "20w29a"; }
-    })
+    mappings project.files("./mappings.jar") { spec ->
+        spec.group = "com.mojang";
+        spec.name = "mojmap";
+        spec.version = "20w29a";
+    }
+
+    // fill parameters and comments with yarn
+    mappings "net.fabricmc:yarn:${project.minecraft_version}+build.${project.yarn_build}:v2"
 
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
