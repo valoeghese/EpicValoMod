@@ -7,6 +7,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import valoeghese.epic.abstraction.core.Game;
+import valoeghese.epic.abstraction.core.Game.Ore;
 
 public class Metallurgy {
 	private static int mohrHardness(float hardnessLow, float hardnessHigh) {
@@ -25,7 +26,7 @@ public class Metallurgy {
 		}
 	}
 
-	public static void addOres() {
+	public static void addMetals() {
 		//   Copper
 		// ===========
 
@@ -83,6 +84,15 @@ public class Metallurgy {
 
 		//  Manganese - enhancing steel (corrosion resistance)
 		// ===========
+	}
+
+	public static void addOreGen() {
+		// copper
+		Game.addOverworldOre(new Ore(8, 20)
+				.addState(50, 0.5f, chalcocite)
+				.addState(64, 1.0f, cuprite)
+				.addState(64, 1.0f, azurite)
+				.addState(128, 1.0f, malachite));
 	}
 
 	public static Item copper_ingot;

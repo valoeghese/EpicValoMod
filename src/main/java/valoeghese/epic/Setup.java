@@ -8,6 +8,7 @@ public class Setup {
 
 	public static void setupMetallurgy() {
 		Logger.info("Metallurgy", "Setting Up!");
-		Metallurgy.addOres();
+		Metallurgy.addMetals();
+		Metallurgy.addOreGen();
 	}
 }
