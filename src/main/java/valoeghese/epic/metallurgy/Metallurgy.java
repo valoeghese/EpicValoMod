@@ -98,7 +98,7 @@ public class Metallurgy {
 	public static void alterTools() {
 		Game.forEachItem(item -> {
 			if (FabricToolTags.PICKAXES.contains(item)) {
-
+				//net.minecraft.world.item.
 			}
 		});
 	}
