@@ -2,12 +2,14 @@ package valoeghese.epic.abstraction.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -18,12 +20,14 @@ import net.minecraft.world.level.biome.Biome.BiomeCategory;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.GenerationStep.Decoration;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration.Predicates;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 import valoeghese.epic.Setup;
+import valoeghese.epic.abstraction.Logger;
 import valoeghese.epic.abstraction.world.Generator;
 
 public final class Game {
@@ -31,9 +35,9 @@ public final class Game {
 		return Registry.register(Registry.BLOCK, new ResourceLocation(Setup.MODID, name), block);
 	}
 
-	public static Block addBlock(String name, Block block, Item.Properties properties) {
+	public static Block addBlock(String name, Block block, Item.Properties itemProperties) {
 		addRawBlock(name, block);
-		Registry.register(Registry.ITEM, new ResourceLocation(Setup.MODID, name), new BlockItem(block, properties));
+		addItem(name, new BlockItem(block, itemProperties));
 		return block;
 	}
 
@@ -50,16 +54,24 @@ public final class Game {
 		return generator;
 	}
 
-	public static void addOre(RuleTest target, BlockState state, int size, int range, int count, Predicate<Biome> biomePredicate) {
+	public static void addGenFeature(Decoration decorationStep, ConfiguredFeature<?, ?> feature, Predicate<Biome> biomePredicate) {
 		BuiltinRegistries.BIOME.forEach(b -> {
 			if (biomePredicate.test(b)) {
-				b.addFeature(
-						Decoration.UNDERGROUND_ORES,
-						Feature.ORE.configured(new OreConfiguration(target, state, size))
-						.range(range).squared().count(count)
-						);
+				b.addFeature(decorationStep, feature);
 			}
 		});
+
+		RegistryEntryAddedCallback.event(BuiltinRegistries.BIOME).register((id, location, b) -> {
+			if (biomePredicate.test(b)) {
+				b.addFeature(decorationStep, feature);
+			}
+		});
+	}
+
+	public static void addOre(RuleTest target, BlockState state, int size, int range, int count, Predicate<Biome> biomePredicate) {
+		addGenFeature(Decoration.UNDERGROUND_ORES,
+				Feature.ORE.configured(new OreConfiguration(target, state, size))
+				.range(range).squared().count(count), biomePredicate);
 	}
 
 	private static void addOverworldOre(int size, int count, float[] weights, int[] ranges, BlockState[] blocks) {
@@ -75,7 +87,13 @@ public final class Game {
 		};
 
 		for (int i = 0; i < blocks.length; ++i) {
-			Game.addOre(Predicates.NATURAL_STONE, blocks[i], size, ranges[i], (int) (count * weights[i] / total), overworld);
+			int cnt = (int) (count * weights[i] / total);
+
+			if (cnt < 1) {
+				Logger.warn("Abstraction", "BlockState " + blocks[i] + " received an ore count of 0!");
+			}
+
+			Game.addOre(Predicates.NATURAL_STONE, blocks[i], size, ranges[i], cnt, overworld);
 		}
 	}
 
@@ -113,5 +131,10 @@ public final class Game {
 			this.ranges.add(range);
 			return this;
 		}
+	}
+
+	public static void forEachItem(Consumer<Item> func) {
+		Registry.ITEM.forEach(func);
+		RegistryEntryAddedCallback.event(Registry.ITEM).register((id, location, item) -> func.accept(item));
 	}
 }

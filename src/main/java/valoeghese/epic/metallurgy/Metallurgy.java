@@ -51,6 +51,15 @@ public class Metallurgy {
 				.requiresTool()
 				.breakByTool(FabricToolTags.PICKAXES, mohrHardness(3.5f, 4))), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
 
+		bornite = Game.addBlock("bornite", new Block(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
+				.requiresTool()
+				.breakByTool(FabricToolTags.PICKAXES, mohrHardness(3))), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
+
+		// need silica sand to extract
+		chalcopyrite = Game.addBlock("chalcopyrite", new Block(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
+				.requiresTool()
+				.breakByTool(FabricToolTags.PICKAXES, mohrHardness(3.5f, 4))), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
+
 		//    Iron
 		// ===========
 		// with vanilla -> native iron
@@ -86,19 +95,31 @@ public class Metallurgy {
 		// ===========
 	}
 
+	public static void alterTools() {
+		Game.forEachItem(item -> {
+			if (FabricToolTags.PICKAXES.contains(item)) {
+
+			}
+		});
+	}
+
 	public static void addOreGen() {
 		// copper
-		Game.addOverworldOre(new Ore(8, 20)
-				.addState(50, 0.5f, chalcocite)
-				.addState(64, 1.0f, cuprite)
-				.addState(64, 1.0f, azurite)
+		Game.addOverworldOre(new Ore(12, 20)
+				.addState(96, 1.0f, azurite)
+				.addState(64, 1.0f, bornite)
+				.addState(64, 0.5f, chalcocite)
+				.addState(96, 1.5f, chalcopyrite)
+				.addState(96, 1.0f, cuprite)
 				.addState(128, 1.0f, malachite));
 	}
 
 	public static Item copper_ingot;
 
 	public static Block azurite;
+	public static Block bornite;
 	public static Block chalcocite;
+	public static Block chalcopyrite;
 	public static Block cuprite;
 	public static Block malachite;
 }

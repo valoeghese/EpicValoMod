@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "epic_fantasy:bornite"
+  },
+  "result": "epic_fantasy:copper_ingot",
+  "experience": 0.1,
+  "cookingtime": 200
+}
