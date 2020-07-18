@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "epic_fantasy:chalcopyrite_chunks"
+    },
+    {
+      "item": "epic_fantasy:silica_sand"
+    }
+  ],
+  "result": {
+    "item": "epic_fantasy:cupric_silica_mix",
+    "count": 1
+  }
+}

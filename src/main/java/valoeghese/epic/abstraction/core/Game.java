@@ -28,6 +28,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguratio
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 import valoeghese.epic.Setup;
 import valoeghese.epic.abstraction.Logger;
+import valoeghese.epic.abstraction.world.BiomeGen;
 import valoeghese.epic.abstraction.world.Generator;
 
 public final class Game {
@@ -99,6 +100,10 @@ public final class Game {
 
 	public static void addOverworldOre(Ore ore) {
 		addOverworldOre(ore.size, ore.count, ore.weights.toFloatArray(), ore.ranges.toIntArray(), ore.states.toArray(new BlockState[0]));
+	}
+
+	public static BiomeGen addBiome(BiomeGen biome) {
+		return Registry.register(BuiltinRegistries.BIOME, biome.location, biome);
 	}
 
 	public static class Ore {

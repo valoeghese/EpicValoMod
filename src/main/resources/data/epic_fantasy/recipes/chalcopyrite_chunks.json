@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "epic_fantasy:chalcopyrite"
+    }
+  ],
+  "result": {
+    "item": "epic_fantasy:chalcopyrite_chunks",
+    "count": 1
+  }
+}

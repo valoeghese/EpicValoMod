@@ -4,10 +4,14 @@ import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.tool.attribute.v1.FabricToolTags;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import valoeghese.epic.abstraction.core.Game;
 import valoeghese.epic.abstraction.core.Game.Ore;
+import valoeghese.epic.abstraction.world.BiomeGen;
+import valoeghese.epic.abstraction.world.BlockType;
 
 public class Metallurgy {
 	private static int mohrHardness(float hardnessLow, float hardnessHigh) {
@@ -27,42 +31,54 @@ public class Metallurgy {
 	}
 
 	public static void addMetals() {
+		// Other useful stuff
+		silicaSand = Game.addBlock("silica_sand", BlockType.FALLING.create(FabricBlockSettings.copy(Blocks.SAND)),
+				new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
+
 		//   Copper
 		// ===========
 
-		copper_ingot = Game.addItem("copper_ingot", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
+		copperIngot = Game.addItem("copper_ingot", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
+
+		// native copper
+		nativeCopper = Game.addBlock("copper_ore", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
+				.requiresTool()
+				.breakByTool(FabricToolTags.PICKAXES, mohrHardness(2.5f, 3))), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
 
 		// important copper ore
-		chalcocite = Game.addBlock("chalcocite", new Block(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
+		chalcocite = Game.addBlock("chalcocite", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
 				.requiresTool()
 				.breakByTool(FabricToolTags.PICKAXES, mohrHardness(2.5f, 3))), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
 
 		// green pigment
-		malachite = Game.addBlock("malachite", new Block(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
+		malachite = Game.addBlock("malachite", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
 				.requiresTool()
 				.breakByTool(FabricToolTags.PICKAXES, mohrHardness(3.5f, 4))), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
 
 		// cyan pigment
-		azurite = Game.addBlock("azurite", new Block(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
+		azurite = Game.addBlock("azurite", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
 				.requiresTool()
 				.breakByTool(FabricToolTags.PICKAXES, mohrHardness(3.5f, 4))), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
 
-		cuprite = Game.addBlock("cuprite", new Block(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
+		cuprite = Game.addBlock("cuprite", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
 				.requiresTool()
 				.breakByTool(FabricToolTags.PICKAXES, mohrHardness(3.5f, 4))), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
 
-		bornite = Game.addBlock("bornite", new Block(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
+		bornite = Game.addBlock("bornite", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
 				.requiresTool()
 				.breakByTool(FabricToolTags.PICKAXES, mohrHardness(3))), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
 
 		// need silica sand to extract
-		chalcopyrite = Game.addBlock("chalcopyrite", new Block(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
+		chalcopyrite = Game.addBlock("chalcopyrite", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
 				.requiresTool()
 				.breakByTool(FabricToolTags.PICKAXES, mohrHardness(3.5f, 4))), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
 
+		chalcopyriteChunks = Game.addItem("chalcopyrite_chunks", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
+		chalcopyriteChunksSilica = Game.addItem("cupric_silica_mix", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
+
 		//    Iron
 		// ===========
-		// with vanilla -> native iron
+		// with vanilla iron = native iron (kamacite, has low nickel content alloyed).
 
 		//   Electrum (natural alloy of gold and silver)
 		// ============
@@ -95,12 +111,10 @@ public class Metallurgy {
 		// ===========
 	}
 
-	public static void alterTools() {
-		Game.forEachItem(item -> {
-			if (FabricToolTags.PICKAXES.contains(item)) {
-				//net.minecraft.world.item.
-			}
-		});
+	public static void addBiomes() {
+		silicaSandBeach = new BiomeGen(new BiomeGen.Properties("silica_sand_beach", Biome.BiomeCategory.BEACH)
+				.shape(Biomes.BEACH.getDepth(), Biomes.BEACH.getScale())
+				);
 	}
 
 	public static void addOreGen() {
@@ -112,9 +126,14 @@ public class Metallurgy {
 				.addState(96, 1.5f, chalcopyrite)
 				.addState(96, 1.0f, cuprite)
 				.addState(128, 1.0f, malachite));
+
+		Game.addOverworldOre(new Ore(4, 2)
+				.addState(64, 1.0f, nativeCopper));
 	}
 
-	public static Item copper_ingot;
+	public static Item chalcopyriteChunks;
+	public static Item chalcopyriteChunksSilica;
+	public static Item copperIngot;
 
 	public static Block azurite;
 	public static Block bornite;
@@ -122,4 +141,8 @@ public class Metallurgy {
 	public static Block chalcopyrite;
 	public static Block cuprite;
 	public static Block malachite;
+	public static Block nativeCopper;
+	public static Block silicaSand;
+
+	public static BiomeGen silicaSandBeach;
 }
