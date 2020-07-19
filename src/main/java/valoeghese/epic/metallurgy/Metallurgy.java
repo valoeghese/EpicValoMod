@@ -50,6 +50,10 @@ public class Metallurgy {
 
 		copperIngot = Game.addItem("copper_ingot", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
 
+		blockCopper = Game.addBlock("copper_block", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK)
+				.requiresTool()
+				.breakByTool(FabricToolTags.PICKAXES, mohrHardness(2.5f, 3))), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
+
 		// native copper
 		nativeCopper = Game.addBlock("copper_ore", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
 				.requiresTool()
@@ -90,11 +94,33 @@ public class Metallurgy {
 		// ===========
 		// with vanilla iron = native iron (kamacite, has low nickel content alloyed).
 
+		// + pyrite 
+		// + magnetite
+		// + hematite
+		// + ?
+
 		//   Electrum (natural alloy of gold and silver)
 		// ============
 
 		//    Zinc
 		// ===========
+		zincIngot = Game.addItem("zinc_ingot", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
+
+		nativeZinc = Game.addBlock("zinc_ore", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
+				.requiresTool()
+				.breakByTool(FabricToolTags.PICKAXES, mohrHardness(2.5f))), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
+
+		blockZinc = Game.addBlock("zinc_block", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK)
+				.requiresTool()
+				.breakByTool(FabricToolTags.PICKAXES, mohrHardness(2.5f))), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
+
+		sphalerite = Game.addBlock("sphalerite", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
+				.requiresTool()
+				.breakByTool(FabricToolTags.PICKAXES, mohrHardness(3.5f, 4))), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
+
+		smithsonite = Game.addBlock("smithsonite", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
+				.requiresTool()
+				.breakByTool(FabricToolTags.PICKAXES, mohrHardness(4.5f))), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
 
 		//  Vanadium - hardened steel
 		// ===========
@@ -108,8 +134,35 @@ public class Metallurgy {
 		//    Tin
 		// ===========
 
+		tinIngot = Game.addItem("tin_ingot", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
+
+		blockTin = Game.addBlock("tin_block", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK)
+				.requiresTool()
+				.breakByTool(FabricToolTags.PICKAXES, 1)), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
+
+		cassiterite = Game.addBlock("cassiterite", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
+				.requiresTool()
+				.breakByTool(FabricToolTags.PICKAXES, mohrHardness(6, 7))), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
+
+		stannite = Game.addBlock("stannite", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
+				.requiresTool()
+				.breakByTool(FabricToolTags.PICKAXES, mohrHardness(4))), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
+
 		//    Lead
 		// ===========
+
+		blockLead = Game.addBlock("lead_block", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK)
+				.requiresTool()
+				.breakByTool(FabricToolTags.PICKAXES, mohrHardness(1.5f))), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
+
+		nativeLead = Game.addBlock("lead_ore", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
+				.requiresTool()
+				.breakByTool(FabricToolTags.PICKAXES, mohrHardness(1.5f))), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
+
+		// also a silver ore
+		galena = Game.addBlock("galena", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
+				.requiresTool()
+				.breakByTool(FabricToolTags.PICKAXES, mohrHardness(2.5f, 2.75f))), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
 
 		//   Silver
 		// ===========
@@ -119,6 +172,29 @@ public class Metallurgy {
 
 		//  Manganese - enhancing steel (corrosion resistance)
 		// ===========
+
+		// Mercury
+		// TODO make it spawn liquid mercury on break.
+		mercuryDeposit = Game.addBlock("mercury_ore", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
+				.requiresTool()
+				.breakByTool(FabricToolTags.PICKAXES, 1)), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
+
+		// Alloys
+
+		blockBrass = Game.addBlock("brass_block", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK)
+				.requiresTool()
+				.breakByTool(FabricToolTags.PICKAXES, 1)), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
+
+		blockBronze = Game.addBlock("bronze_block", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK)
+				.requiresTool()
+				.breakByTool(FabricToolTags.PICKAXES, 2)), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
+
+		// Yes, it very very rarely can form naturally. I'm gonna make this really rare.
+		// Also a meme reference to that comment on the forge allomancy mod
+		nativeBrass = Game.addBlock("brass_ore", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_ORE)
+				.requiresTool()
+				.breakByTool(FabricToolTags.PICKAXES, 1)), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
+
 	}
 
 	public static void addBiomes() {
@@ -159,30 +235,60 @@ public class Metallurgy {
 	}
 
 	public static void addOreGen() {
-		// copper
-		Game.addOverworldOre(new Ore(12, 20)
-				.addState(96, 1.0f, azurite)
-				.addState(64, 1.0f, bornite)
-				.addState(64, 0.5f, chalcocite)
-				.addState(96, 1.5f, chalcopyrite)
-				.addState(96, 1.0f, cuprite)
-				.addState(128, 1.0f, malachite));
+		// Tin (generates with granite); Copper
+		Game.addOverworldOre("copper_tin_ore_placer", new Game.ComplexOre()
+				.addOre(new Ore(12, 20)
+						.addState(96, 1.0f, azurite)
+						.addState(64, 1.0f, bornite)
+						.addState(64, 0.5f, chalcocite)
+						.addState(96, 1.5f, chalcopyrite)
+						.addState(96, 1.0f, cuprite)
+						.addState(128, 1.0f, malachite), 0.5f, 0.6f)
+				.addOre(new Ore(10, 14, Blocks.GRANITE.defaultBlockState())
+						.addState(64, 0.25f, stannite)
+						.addState(44, 1.0f, cassiterite), -0.5f, 0.6f));
 
 		Game.addOverworldOre(new Ore(4, 2)
 				.addState(64, 1.0f, nativeCopper));
+
+		// Zinc
+		Game.addOverworldOre(new Ore(12, 22)
+				.addState(72, 1.0f, smithsonite)
+				.addState(72, 1.0f, sphalerite));
+
+		Game.addOverworldOre(new Ore(2, 1)
+				.addState(48, 1.0f, nativeZinc));
 	}
 
 	public static Item chalcopyriteChunks;
 	public static Item chalcopyriteChunksSilica;
 	public static Item copperIngot;
+	public static Item tinIngot;
+	public static Item zincIngot;
 
 	public static Block azurite;
 	public static Block bornite;
+	public static Block cassiterite;
 	public static Block chalcocite;
 	public static Block chalcopyrite;
 	public static Block cuprite;
+	public static Block galena;
 	public static Block malachite;
+	public static Block mercuryDeposit;
+	public static Block nativeBrass;
 	public static Block nativeCopper;
+	public static Block nativeLead;
+	public static Block nativeZinc;
+	public static Block smithsonite;
+	public static Block sphalerite;
+	public static Block stannite;
+
+	public static Block blockBrass;
+	public static Block blockBronze;
+	public static Block blockCopper;
+	public static Block blockLead;
+	public static Block blockTin;
+	public static Block blockZinc;
 	public static Block silicaSand;
 	public static Block silicaSandstone;
 

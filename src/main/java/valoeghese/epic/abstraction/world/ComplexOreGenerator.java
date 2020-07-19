@@ -12,7 +12,7 @@ import valoeghese.epic.util.OpenSimplexNoise;
 public class ComplexOreGenerator implements Generator {
 	@Override
 	public boolean generate(World world, Random rand, BlockPos pos) {
-		throw new UnsupportedOperationException("Do not use simplified Generate Method!");
+		throw new UnsupportedOperationException("Do not use simplified Generate Method for ComplexOreGenerator!");
 	}
 
 	private static final OpenSimplexNoise NOISE = new OpenSimplexNoise(new Random(1032));

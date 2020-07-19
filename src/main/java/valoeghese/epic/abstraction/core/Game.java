@@ -32,6 +32,7 @@ import valoeghese.epic.abstraction.world.BiomeGen;
 import valoeghese.epic.abstraction.world.ComplexOreGenerator;
 import valoeghese.epic.abstraction.world.Generator;
 import valoeghese.epic.abstraction.world.GeneratorType;
+import valoeghese.epic.abstraction.world.SpecialOre;
 
 public final class Game {
 	public static Block addRawBlock(String name, Block block) {
@@ -88,8 +89,13 @@ public final class Game {
 				Logger.warn("Abstraction", "BlockState " + ore.states.get(i) + " received an ore count of 0!");
 			}
 
-			list.add(Feature.ORE.configured(new OreConfiguration(target, ore.states.get(i), ore.size))
-					.range(ore.ranges.getInt(i)).squared().count(ore.count));
+			if (ore.specialBunny == null) {
+				list.add(Feature.ORE.configured(new OreConfiguration(target, ore.states.get(i), ore.size))
+						.range(ore.ranges.getInt(i)).squared().count(ore.count));
+			} else {
+				list.add(SpecialOre.FEATURE.configured(new OreConfiguration(new SpecialOre.CodecHacks(ore.specialBunny), ore.states.get(i), ore.size))
+						.range(ore.ranges.getInt(i)).squared().count(ore.count));
+			}
 		}
 
 		return list;
@@ -156,10 +162,18 @@ public final class Game {
 		public Ore(int size, int count) {
 			this.size = size;
 			this.count = count;
+			this.specialBunny = null;
+		}
+
+		public Ore(int size, int count, BlockState specialBunny) {
+			this.size = size;
+			this.count = count;
+			this.specialBunny = specialBunny;
 		}
 
 		private final int size;
 		private final int count;
+		private final BlockState specialBunny;
 		private final List<BlockState> states = new ArrayList<>();
 		private final IntList ranges = new IntArrayList();
 		private final FloatList weights = new FloatArrayList();
