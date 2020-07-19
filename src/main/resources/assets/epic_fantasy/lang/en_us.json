@@ -5,6 +5,11 @@
   "block.epic_fantasy.chalcopyrite": "Chalcopyrite",
   "block.epic_fantasy.cuprite": "Cuprite",
   "block.epic_fantasy.malachite": "Malachite",
+  "block.epic_fantasy.copper_ore": "Native Copper",
+  "block.epic_fantasy.silica_sand": "Silica Sand",
+  "block.epic_fantasy.silica_sandstone": "Silica Sandstone",
 
-  "item.epic_fantasy.copper_ingot": "Copper Ingot"
+  "item.epic_fantasy.copper_ingot": "Copper Ingot",
+  "item.epic_fantasy.chalcopyrite_chunks": "Chalcopyrite Chunks",
+  "item.epic_fantasy.cupric_silica_mix": "Cupric Silica Mix"
 }
