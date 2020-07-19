@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "##",
+    "##"
+  ],
+  "key": {
+    "#": {
+      "item": "epic_fantasy:silica_sand"
+    }
+  },
+  "result": {
+    "item": "epic_fantasy:silica_sandstone",
+    "count": 1
+  }
+}

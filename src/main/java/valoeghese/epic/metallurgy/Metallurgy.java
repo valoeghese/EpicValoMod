@@ -1,5 +1,9 @@
 package valoeghese.epic.metallurgy;
 
+import java.util.Random;
+
+import net.fabricmc.fabric.api.biomes.v1.FabricBiomes;
+import net.fabricmc.fabric.api.biomes.v1.OverworldBiomes;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.tool.attribute.v1.FabricToolTags;
 import net.minecraft.world.item.CreativeModeTab;
@@ -8,10 +12,13 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderBaseConfiguration;
 import valoeghese.epic.abstraction.core.Game;
 import valoeghese.epic.abstraction.core.Game.Ore;
+import valoeghese.epic.abstraction.event.BiomePlacementCallback;
 import valoeghese.epic.abstraction.world.BiomeGen;
 import valoeghese.epic.abstraction.world.BlockType;
+import valoeghese.epic.util.OpenSimplexNoise;
 
 public class Metallurgy {
 	private static int mohrHardness(float hardnessLow, float hardnessHigh) {
@@ -33,6 +40,9 @@ public class Metallurgy {
 	public static void addMetals() {
 		// Other useful stuff
 		silicaSand = Game.addBlock("silica_sand", BlockType.FALLING.create(FabricBlockSettings.copy(Blocks.SAND)),
+				new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
+
+		silicaSandstone = Game.addBlock("silica_sandstone", BlockType.BASIC.create(FabricBlockSettings.copy(Blocks.SANDSTONE)),
 				new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
 
 		//   Copper
@@ -112,9 +122,40 @@ public class Metallurgy {
 	}
 
 	public static void addBiomes() {
-		silicaSandBeach = new BiomeGen(new BiomeGen.Properties("silica_sand_beach", Biome.BiomeCategory.BEACH)
+		silicaSandBeach = Game.addBiome(new BiomeGen(new BiomeGen.Properties("silica_sand_beach", Biome.BiomeCategory.BEACH)
 				.shape(Biomes.BEACH.getDepth(), Biomes.BEACH.getScale())
-				);
+				.surfaceBlocks(new SurfaceBuilderBaseConfiguration(
+						silicaSand.defaultBlockState(),
+						silicaSand.defaultBlockState(),
+						Blocks.GRAVEL.defaultBlockState()))
+				));
+
+		silicaSandDesert = Game.addBiome(new BiomeGen(new BiomeGen.Properties("silica_sand_desert", Biome.BiomeCategory.BEACH)
+				.shape(Biomes.DESERT.getDepth(), Biomes.DESERT.getScale())
+				.surfaceBlocks(new SurfaceBuilderBaseConfiguration(
+						silicaSand.defaultBlockState(),
+						silicaSandstone.defaultBlockState(),
+						Blocks.GRAVEL.defaultBlockState()))
+				));
+
+		FabricBiomes.addSpawnBiome(silicaSandBeach);
+		FabricBiomes.addSpawnBiome(silicaSandDesert);
+
+		OverworldBiomes.addBiomeVariant(Biomes.DESERT, silicaSandDesert, 0.25);
+		OverworldBiomes.addShoreBiome(silicaSandDesert, silicaSandBeach, 1.0);
+
+		OpenSimplexNoise noise = new OpenSimplexNoise(new Random(0));
+
+		BiomePlacementCallback.OVERWORLD.register((biome, x, z) -> {
+			if (biome.get() == Biomes.BEACH) {
+				if (noise.sample(0.01 * x, 0.01 * z) > 0.3) {
+					biome.set(silicaSandBeach);
+					return true;
+				}
+			}
+
+			return false;
+		});
 	}
 
 	public static void addOreGen() {
@@ -143,6 +184,8 @@ public class Metallurgy {
 	public static Block malachite;
 	public static Block nativeCopper;
 	public static Block silicaSand;
+	public static Block silicaSandstone;
 
 	public static BiomeGen silicaSandBeach;
+	public static BiomeGen silicaSandDesert;
 }

@@ -10,6 +10,7 @@ import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.surfacebuilders.ConfiguredSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderBaseConfiguration;
 import valoeghese.epic.Setup;
@@ -54,6 +55,8 @@ public class BiomeGen extends Biome {
 	}
 
 	private static BiomeBuilder construct(Properties properties) {
+		ConfiguredSurfaceBuilder<SurfaceBuilderBaseConfiguration> sb = new DelegatingSurfaceBuilder().configured(properties.config);
+
 		BiomeBuilder result = new BiomeBuilder()
 				.depth(properties.baseHeight)
 				.scale(properties.heightVariation)
@@ -61,7 +64,7 @@ public class BiomeGen extends Biome {
 				.precipitation(properties.precipitation)
 				.temperature(properties.temperature)
 				.downfall(properties.rainfall)
-				.surfaceBuilder(() -> new DelegatingSurfaceBuilder().configured(properties.config))
+				.surfaceBuilder(() -> sb)
 				.specialEffects(new BiomeSpecialEffects.Builder()
 						.waterColor(properties.waterColour)
 						.waterFogColor(properties.waterFogColour)

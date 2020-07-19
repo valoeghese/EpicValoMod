@@ -3,5 +3,6 @@
   "package": "valoeghese.epic.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "MixinOverworldBiomeSource"
   ]
 }
