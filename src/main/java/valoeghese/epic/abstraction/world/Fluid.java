@@ -51,7 +51,7 @@ public abstract class Fluid {
 
 		private Item bucket;
 		private Impl flowingFluid, sourceFluid;
-		private Block source;
+		private Block block;
 
 		@Override
 		public net.minecraft.world.level.material.Fluid getFlowing() {
@@ -66,6 +66,11 @@ public abstract class Fluid {
 		@Override
 		protected boolean canConvertToSource() {
 			return this.fluid.allowInfiniteSource();
+		}
+
+		@Override
+		public boolean isSame(net.minecraft.world.level.material.Fluid fluid) {
+			return this == flowingFluid || this == sourceFluid;
 		}
 
 		@Override
@@ -85,6 +90,7 @@ public abstract class Fluid {
 
 		@Override
 		protected int getDropOff(LevelReader levelReader) {
+			// probably controls the drop of the level and thus how far it goes
 			return this.fluid.lavaLike() ? 2 : 1;
 		}
 
@@ -111,7 +117,7 @@ public abstract class Fluid {
 
 		@Override
 		protected BlockState createLegacyBlock(FluidState fluidState) {
-			return this.source.defaultBlockState().setValue(LiquidBlock.LEVEL, getLegacyLevel(fluidState));
+			return this.block.defaultBlockState().setValue(LiquidBlock.LEVEL, getLegacyLevel(fluidState));
 		}
 
 		private static Item createBucket(Impl source) {
@@ -121,7 +127,7 @@ public abstract class Fluid {
 		public static Tuple<Impl, Impl> compileFluid(Fluid fluid) {
 			fluid.tag = TagRegistry.fluid(new ResourceLocation(Game.primedId, fluid.getName()));
 			Impl source = new ImplSource(fluid);
-			Impl flowing = new ImplFlowign(fluid);
+			Impl flowing = new ImplFlowing(fluid);
 
 			source.flowingFluid = flowing;
 			flowing.flowingFluid = flowing;
@@ -137,12 +143,12 @@ public abstract class Fluid {
 
 		public static void postRegister(Fluid fluid, Impl source, Impl flowing, BiFunction<Impl, Block.Properties, Block> blockConstructor) {
 			Block block = Game.addRawBlock(fluid.getName(), blockConstructor.apply(source, BlockBehaviour.Properties.of(fluid.lavaLike() ? Material.LAVA : Material.WATER).noCollission().strength(100.0F).noDrops()));
-			source.source = block;
-			flowing.source = block;
+			source.block = block;
+			flowing.block = block;
 		}
 	}
 
-	public static class ImplSource extends Impl {
+	static class ImplSource extends Impl {
 		public ImplSource(Fluid fluid) {
 			super(fluid);
 		}
@@ -158,8 +164,8 @@ public abstract class Fluid {
 		}
 	}
 
-	public static class ImplFlowign extends Impl {
-		public ImplFlowign(Fluid fluid) {
+	static class ImplFlowing extends Impl {
+		public ImplFlowing(Fluid fluid) {
 			super(fluid);
 		}
 
@@ -179,6 +185,7 @@ public abstract class Fluid {
 			return false;
 		}
 	}
+
 	public static class SimpleLiquidBlock extends LiquidBlock {
 		SimpleLiquidBlock(FlowingFluid flowingFluid, BlockBehaviour.Properties properties) {
 			super(flowingFluid, properties);

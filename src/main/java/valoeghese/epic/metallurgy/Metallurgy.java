@@ -181,6 +181,7 @@ public class Metallurgy {
 				.breakByTool(FabricToolTags.PICKAXES, 1)), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
 
 		mercury = Game.addFluid(new Mercury(), Mercury.Block::new);
+
 		// Alloys
 
 		blockBrass = Game.addBlock("brass_block", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK)
