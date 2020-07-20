@@ -34,7 +34,7 @@ public class Mercury extends Fluid {
 
 	@Override
 	public int getColour() {
-		return 0x696969;
+		return 0xa9a9a9;
 	}
 
 	public static class Block extends LiquidBlock {
