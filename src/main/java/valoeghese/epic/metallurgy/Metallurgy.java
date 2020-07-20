@@ -16,8 +16,9 @@ import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderBaseConf
 import valoeghese.epic.abstraction.core.Game;
 import valoeghese.epic.abstraction.core.Game.Ore;
 import valoeghese.epic.abstraction.event.BiomePlacementCallback;
-import valoeghese.epic.abstraction.world.BiomeGen;
 import valoeghese.epic.abstraction.world.BlockType;
+import valoeghese.epic.abstraction.world.Fluid;
+import valoeghese.epic.abstraction.world.gen.BiomeGen;
 import valoeghese.epic.util.OpenSimplexNoise;
 
 public class Metallurgy {
@@ -179,6 +180,7 @@ public class Metallurgy {
 				.requiresTool()
 				.breakByTool(FabricToolTags.PICKAXES, 1)), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS));
 
+		mercury = Game.addFluid(new Mercury(), Mercury.Block::new);
 		// Alloys
 
 		blockBrass = Game.addBlock("brass_block", BlockType.BASIC.create(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK)
@@ -291,6 +293,8 @@ public class Metallurgy {
 	public static Block blockZinc;
 	public static Block silicaSand;
 	public static Block silicaSandstone;
+
+	public static Fluid mercury;
 
 	public static BiomeGen silicaSandBeach;
 	public static BiomeGen silicaSandDesert;

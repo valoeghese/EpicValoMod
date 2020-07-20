@@ -5,10 +5,13 @@
 
   "name": "Valoeghese's Epic Fantasy",
   "description": "Epic Mod",
-  "license": "All Rights Reserved",
+  "license": "The Abstraction Lib (\"valoeghese.epic.abstraction\" and \"valoeghese.epic.mixin\" packaged files) are MIT, and the Mod (everything else) is All Rights Reserved.",
   "environment": "*",
   "entrypoints": {
     "main": [
+      "valoeghese.epic.abstraction.Initialise"
+    ],
+    "client": [
       "valoeghese.epic.abstraction.Initialise"
     ]
   },

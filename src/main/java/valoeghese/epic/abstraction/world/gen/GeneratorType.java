@@ -1,4 +1,4 @@
-package valoeghese.epic.abstraction.world;
+package valoeghese.epic.abstraction.world.gen;
 
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;

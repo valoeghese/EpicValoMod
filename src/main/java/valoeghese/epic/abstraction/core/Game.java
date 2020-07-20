@@ -2,6 +2,7 @@ package valoeghese.epic.abstraction.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -13,6 +14,7 @@ import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Tuple;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.biome.Biome;
@@ -26,17 +28,21 @@ import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfigur
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration.Predicates;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
-import valoeghese.epic.Setup;
 import valoeghese.epic.abstraction.Logger;
-import valoeghese.epic.abstraction.world.BiomeGen;
-import valoeghese.epic.abstraction.world.ComplexOreGenerator;
-import valoeghese.epic.abstraction.world.Generator;
-import valoeghese.epic.abstraction.world.GeneratorType;
-import valoeghese.epic.abstraction.world.SpecialOre;
+import valoeghese.epic.abstraction.world.Fluid;
+import valoeghese.epic.abstraction.world.Fluid.Impl;
+import valoeghese.epic.abstraction.world.FluidResourceLoader;
+import valoeghese.epic.abstraction.world.gen.BiomeGen;
+import valoeghese.epic.abstraction.world.gen.ComplexOreGenerator;
+import valoeghese.epic.abstraction.world.gen.Generator;
+import valoeghese.epic.abstraction.world.gen.GeneratorType;
+import valoeghese.epic.abstraction.world.gen.SpecialOre;
 
 public final class Game {
+	public static String primedId;
+
 	public static Block addRawBlock(String name, Block block) {
-		return Registry.register(Registry.BLOCK, new ResourceLocation(Setup.MODID, name), block);
+		return Registry.register(Registry.BLOCK, new ResourceLocation(primedId, name), block);
 	}
 
 	public static Block addBlock(String name, Block block, Item.Properties itemProperties) {
@@ -46,11 +52,11 @@ public final class Game {
 	}
 
 	public static Item addItem(String name, Item item) {
-		return Registry.register(Registry.ITEM, new ResourceLocation(Setup.MODID, name), item);
+		return Registry.register(Registry.ITEM, new ResourceLocation(primedId, name), item);
 	}
 
 	public static <T extends FeatureConfiguration> Feature<T> addFeature(String name, Feature<T> feature) {
-		return Registry.register(Registry.FEATURE, new ResourceLocation(Setup.MODID, name), feature);
+		return Registry.register(Registry.FEATURE, new ResourceLocation(primedId, name), feature);
 	}
 
 	public static GeneratorType addGenerator(String name, Generator generator) {
@@ -132,6 +138,18 @@ public final class Game {
 
 	public static BiomeGen addBiome(BiomeGen biome) {
 		return Registry.register(BuiltinRegistries.BIOME, biome.location, biome);
+	}
+
+	public static Fluid addFluid(Fluid fluid, BiFunction<Fluid.Impl, Block.Properties, Block> blockConstructor) {
+		Tuple<Impl, Impl> internalFluids = Fluid.Impl.compileFluid(fluid);
+		FluidResourceLoader.addFluid(
+				Registry.register(Registry.FLUID, new ResourceLocation(primedId, fluid.getName()), internalFluids.getA())
+				);
+		FluidResourceLoader.addFluid(
+				Registry.register(Registry.FLUID, new ResourceLocation(primedId, "flowing_" + fluid.getName()), internalFluids.getB())
+				);
+		Fluid.Impl.postRegister(fluid, internalFluids.getA(), internalFluids.getB(), blockConstructor);
+		return fluid;
 	}
 
 	public static class ComplexOre {

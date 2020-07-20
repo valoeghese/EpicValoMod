@@ -1,4 +1,4 @@
-package valoeghese.epic.abstraction.world;
+package valoeghese.epic.abstraction.world.gen;
 
 import java.util.Random;
 
@@ -13,7 +13,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.surfacebuilders.ConfiguredSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderBaseConfiguration;
-import valoeghese.epic.Setup;
+import valoeghese.epic.abstraction.core.Game;
 
 public class BiomeGen extends Biome {
 	public BiomeGen(Properties properties) {
@@ -21,7 +21,7 @@ public class BiomeGen extends Biome {
 
 		BiomeDefaultFeatures.addSurfaceFreezing(this);
 		((DelegatingSurfaceBuilder) this.getSurfaceBuilder().get().surfaceBuilder).delegate = this;
-		this.location = new ResourceLocation(Setup.MODID, properties.name);
+		this.location = new ResourceLocation(Game.primedId, properties.name);
 	}
 
 	public final ResourceLocation location;

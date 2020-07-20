@@ -1,4 +1,4 @@
-package valoeghese.epic.abstraction.world;
+package valoeghese.epic.abstraction.world.gen;
 
 import java.util.List;
 import java.util.Random;
