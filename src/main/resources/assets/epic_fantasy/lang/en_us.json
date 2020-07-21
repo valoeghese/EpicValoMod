@@ -18,5 +18,7 @@
   "item.epic_fantasy.zinc_ingot": "Zinc Ingot",
   "item.epic_fantasy.tin_ingot": "Tin Ingot",
   "item.epic_fantasy.chalcopyrite_chunks": "Chalcopyrite Chunks",
-  "item.epic_fantasy.cupric_silica_mix": "Cupric Silica Mix"
+  "item.epic_fantasy.cupric_silica_mix": "Cupric Silica Mix",
+  
+  "generator.epic_fantasy": "Epic Fantasy"
 }

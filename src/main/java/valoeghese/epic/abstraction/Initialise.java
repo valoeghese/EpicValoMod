@@ -11,8 +11,10 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.packs.PackType;
 import valoeghese.epic.Setup;
 import valoeghese.epic.abstraction.core.Game;
@@ -36,8 +38,10 @@ public class Initialise implements ModInitializer, ClientModInitializer {
 
 		for (Method m : mod.getMethods()) {
 			if (Modifier.isStatic(m.getModifiers()) && m.getParameterTypes().length == 0 && m.getReturnType().equals(Void.TYPE)) {
-				int priority = m.isAnnotationPresent(Priority.class) ? m.getAnnotation(Priority.class).value() : 0;
-				methods.computeIfAbsent(priority, p -> new ArrayList<>()).add(m);
+				if (!m.isAnnotationPresent(Client.class) || FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+					int priority = m.isAnnotationPresent(Priority.class) ? m.getAnnotation(Priority.class).value() : 0;
+					methods.computeIfAbsent(priority, p -> new ArrayList<>()).add(m);
+				}
 			}
 		}
 	}

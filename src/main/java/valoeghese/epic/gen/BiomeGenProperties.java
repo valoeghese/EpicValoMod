@@ -49,18 +49,23 @@ public class BiomeGenProperties extends ScriptManager {
 				.toString();
 	}
 
+	public static void setupForChunkGen() {
+		INSTANCE.properties = new HashMap<>(INSTANCE.scriptedProperties);
+	}
+
 	public static void addBiome(String id, float depth, float projection, float scale, int smoothness) {
-		BiomeGenProperties.INSTANCE.properties.put(
+		INSTANCE.scriptedProperties.put(
 				BuiltinRegistries.BIOME.get(new ResourceLocation(id)),
 				new BiomeEntry(depth, projection, scale, smoothness));
 	}
 
-	private final Map<Biome, BiomeEntry> properties = new HashMap<>();
+	private Map<Biome, BiomeEntry> properties;
+	private final Map<Biome, BiomeEntry> scriptedProperties = new HashMap<>();
 
 	private static BiomeGenProperties INSTANCE;
 
 	public static BiomeEntry getGenerationProperties(Biome biome) {
-		return BiomeGenProperties.INSTANCE.properties.computeIfAbsent(biome, b -> new BiomeEntry(b.getDepth(), 0.0f, b.getScale(), 5));
+		return INSTANCE.properties.computeIfAbsent(biome, b -> new BiomeEntry(b.getDepth(), 0.0f, b.getScale(), 2));
 	}
 
 	public static class BiomeEntry {
