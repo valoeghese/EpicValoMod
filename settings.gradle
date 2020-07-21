@@ -6,17 +6,5 @@ pluginManagement {
             url = 'https://maven.fabricmc.net/'
         }
         gradlePluginPortal()
-		maven {
-            name = 'Jitpack'
-            url = 'https://jitpack.io'
-        }
-    }
-
-	resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id == "fabric-loom" && requested.version?.endsWith("-SNAPSHOT") != true) {
-                useModule("com.github.Chocohead:Fabric-Loom:${requested.version}")
-            }
-        }
     }
 }
