@@ -59,6 +59,9 @@ public abstract class ScriptManager {
 	}
 
 	protected static class ScriptContext {
+		public ScriptContext() {
+		}
+
 		final Set<String> definitions = new HashSet<>();
 		final StringBuilder classDefinitions = new StringBuilder();
 		final Map<String, Object> objectDefinitions = new HashMap<>();
@@ -70,12 +73,12 @@ public abstract class ScriptManager {
 			}
 		}
 
-		protected void addClassDefinition(String def, Class<?> clazz) {
+		public void addClassDefinition(String def, Class<?> clazz) {
 			checkDef(def);
 			this.classDefinitions.append("var " + def + " = Java.type(\"" + clazz.getName() + "\");\n");
 		}
 
-		protected void addFunctionDefinition(String def, Class<?> clazz, String methodName, int parameterCount) {
+		public void addFunctionDefinition(String def, Class<?> clazz, String methodName, int parameterCount) {
 			if (parameterCount > 26) {
 				throw new RuntimeException("Too many parameters! " + parameterCount);
 			}
@@ -86,12 +89,12 @@ public abstract class ScriptManager {
 			this.methodDefinitions.put(def, new ImmutableTriple<>(classDef, methodName, parameterCount));
 		}
 
-		protected void addObjectDefinition(String def, Object object) {
+		public void addObjectDefinition(String def, Object object) {
 			checkDef(def);
 			this.objectDefinitions.put(def, object);
 		}
 
-		protected Invocable runScript(File file) throws ScriptException, IOException {
+		public Invocable runScript(File file) throws ScriptException, IOException {
 			ScriptEngine engine = ENGINE_SOURCE.get();
 			// add objects
 			engine.getBindings(javax.script.ScriptContext.ENGINE_SCOPE).putAll(this.objectDefinitions);
@@ -128,5 +131,9 @@ public abstract class ScriptManager {
 
 			return (Invocable) engine;
 		}
+	}
+
+	static {
+		LOC.mkdirs();
 	}
 }

@@ -12,6 +12,8 @@ import javax.annotation.Nullable;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.ObjectListIterator;
@@ -64,7 +66,7 @@ public class EpicFantasyChunkGenerator extends ChunkGenerator {
 			return EpicFantasyChunkGenerator.settings;
 		})).apply(instance, instance.stable(EpicFantasyChunkGenerator::new));
 	});
-	private static final float[] BEARD_KERNEL = (float[])Util.make(new float[13824], (fs) -> {
+	private static final float[] BEARD_KERNEL = Util.make(new float[13824], (fs) -> {
 		for(int i = 0; i < 24; ++i) {
 			for(int j = 0; j < 24; ++j) {
 				for(int k = 0; k < 24; ++k) {
@@ -74,15 +76,24 @@ public class EpicFantasyChunkGenerator extends ChunkGenerator {
 		}
 
 	});
-	private static final float[] BIOME_WEIGHTS = (float[])Util.make(new float[25], (fs) -> {
-		for(int i = -2; i <= 2; ++i) {
-			for(int j = -2; j <= 2; ++j) {
-				float f = 10.0F / Mth.sqrt((float)(i * i + j * j) + 0.2F);
-				fs[i + 2 + (j + 2) * 5] = f;
-			}
-		}
 
-	});
+	private static final Int2ObjectMap<float[]> BIOME_WEIGHTS_PROVIDER = new Int2ObjectArrayMap<>();
+
+	private static float[] getBiomeWeights(int smoothness) {
+		return BIOME_WEIGHTS_PROVIDER.computeIfAbsent(smoothness, n -> {
+			int largeN = 2 * n + 1;
+
+			return Util.make(new float[largeN * largeN], (fs) -> {
+				for(int i = -n; i <= n; ++i) {
+					for(int j = -n; j <= n; ++j) {
+						float f = 10.0F / Mth.sqrt((float)(i * i + j * j) + 0.2F);
+						fs[i + n + (j + n) * largeN] = f;
+					}
+				}
+			});
+		});
+	}
+
 	private static final BlockState AIR;
 	private final int chunkHeight;
 	private final int chunkWidth;
@@ -230,7 +241,7 @@ public class EpicFantasyChunkGenerator extends ChunkGenerator {
 					}
 
 					float weightMultiplier = depth > centralBiomeDepth ? 0.5F : 1.0F;
-					float weight = weightMultiplier * BIOME_WEIGHTS[genXOff + 2 + (genZOff + 2) * 5] / (trueNoiseDepth + 2.0F);
+					float weight = weightMultiplier * getBiomeWeights(5)[genXOff + 2 + (genZOff + 2) * 5] / (trueNoiseDepth + 2.0F);
 					finalSummedScale += trueNoiseScale * weight;
 					finalSummedDepth += trueNoiseDepth * weight;
 					totalWeight += weight;
