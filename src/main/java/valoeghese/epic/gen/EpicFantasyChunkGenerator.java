@@ -252,7 +252,7 @@ public class EpicFantasyChunkGenerator extends ChunkGenerator {
 			float finalScale = finalSummedScale / totalWeight;
 			progress = (double)(finalDepth * 0.5F - 0.125F);
 			topSlideSize = (double)(finalScale * 0.9F + 0.1F);
-			ac = progress * 0.265625D;
+			ac = progress * 0.265625D;WorldPreset
 			ad = 96.0D / topSlideSize;
 		}
 
