@@ -3,6 +3,13 @@
   "package": "valoeghese.epic.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "MixinLazyArea",
     "MixinOverworldBiomeSource"
+  ],
+  "client": [
+    "MixinInitModsClient"
+  ],
+  "server": [
+    "MixinInitModsServer"
   ]
 }
