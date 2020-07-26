@@ -37,8 +37,8 @@ public abstract class ScriptManager {
 		return new File(LOC, name);
 	}
 
-	protected static void createIfNotExists(File file, Consumer<PrintWriter> writer) throws IOException {
-		if (file.createNewFile()) {
+	protected static void createIfNotExists(File file, Consumer<PrintWriter> writer, boolean alwaysWriteInDev) throws IOException {
+		if (file.createNewFile() || (FabricLoader.getInstance().isDevelopmentEnvironment() && alwaysWriteInDev)) {
 			try (PrintWriter pr = new PrintWriter(file)) {
 				writer.accept(pr);
 			}
@@ -84,7 +84,7 @@ public abstract class ScriptManager {
 			}
 
 			checkDef(def);
-			String classDef = "generated_" + def.hashCode() + def.substring(0, 3);
+			String classDef = "generated_" + Math.abs(def.hashCode()) + def.substring(0, 3);
 			this.addClassDefinition(classDef, clazz);
 			this.methodDefinitions.put(def, new ImmutableTriple<>(classDef, methodName, parameterCount));
 		}

@@ -81,8 +81,8 @@ public class BiomeGen extends Biome {
 			this.category = category;
 		}
 
-		private final String name;
-		private final BiomeCategory category;
+		public final String name;
+		public final BiomeCategory category;
 		private float baseHeight = 0.125f;
 		private float heightVariation = 0.0f;
 		private Precipitation precipitation = Precipitation.RAIN;
@@ -91,6 +91,14 @@ public class BiomeGen extends Biome {
 		private int waterColour = Biomes.PLAINS.getWaterColor();
 		private int waterFogColour = Biomes.PLAINS.getWaterFogColor();
 		private SurfaceBuilderBaseConfiguration config = SurfaceBuilder.CONFIG_GRASS;
+
+		public float getTemperature() {
+			return this.temperature;
+		}
+
+		public float getRainfall() {
+			return this.rainfall;
+		}
 
 		public Properties surfaceBlocks(SurfaceBuilderBaseConfiguration config) {
 			this.config = config;

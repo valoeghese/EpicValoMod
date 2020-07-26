@@ -56,8 +56,9 @@ import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 import net.minecraft.world.level.levelgen.synth.SurfaceNoise;
 import valoeghese.epic.util.BetterNoise;
 import valoeghese.epic.util.OpenSimplexGenNoise;
+import valoeghese.epic.util.OpenSimplexNoise;
 
-public class EpicFantasyChunkGenerator extends ChunkGenerator {
+public final class EpicFantasyChunkGenerator extends ChunkGenerator {
 	public static final Codec<EpicFantasyChunkGenerator> CODEC = RecordCodecBuilder.create((instance) -> {
 		return instance.group(BiomeSource.CODEC.fieldOf("biome_source").forGetter((EpicFantasyChunkGenerator) -> {
 			return EpicFantasyChunkGenerator.biomeSource;
@@ -101,16 +102,17 @@ public class EpicFantasyChunkGenerator extends ChunkGenerator {
 	private final int chunkCountX;
 	private final int chunkCountY;
 	private final int chunkCountZ;
-	protected final WorldgenRandom random;
-	private final BetterNoise minLimitPerlinNoise;
-	private final BetterNoise maxLimitPerlinNoise;
-	private final BetterNoise mainPerlinNoise;
+	private final WorldgenRandom random;
+	private final BetterNoise minLimitNoise;
+	private final BetterNoise maxLimitNoise;
+	private final BetterNoise mainNoise;
 	private final SurfaceNoise surfaceNoise;
 	private final BetterNoise depthNoise;
 	@Nullable
 	private final SimplexNoise islandNoise;
-	protected final BlockState defaultBlock;
-	protected final BlockState defaultFluid;
+	private final BlockState defaultBlock;
+	private final BlockState defaultFluid;
+	private final OpenSimplexNoise projectionNoise;
 	private final long seed;
 	protected final Supplier<NoiseGeneratorSettings> settings;
 	private final int height;
@@ -134,21 +136,22 @@ public class EpicFantasyChunkGenerator extends ChunkGenerator {
 		this.chunkCountY = noiseSettings.height() / this.chunkHeight;
 		this.chunkCountZ = 16 / this.chunkWidth;
 		this.random = new WorldgenRandom(l);
-		this.minLimitPerlinNoise = new BetterNoise(this.random, IntStream.rangeClosed(-15, 0));
-		this.maxLimitPerlinNoise = new BetterNoise(this.random, IntStream.rangeClosed(-15, 0));
-		this.mainPerlinNoise = new BetterNoise(this.random, IntStream.rangeClosed(-7, 0));
+		this.minLimitNoise = new BetterNoise(this.random, IntStream.rangeClosed(-15, 0));
+		this.maxLimitNoise = new BetterNoise(this.random, IntStream.rangeClosed(-15, 0));
+		this.mainNoise = new BetterNoise(this.random, IntStream.rangeClosed(-7, 0));
 		this.surfaceNoise = (SurfaceNoise)(noiseSettings.useSimplexSurfaceNoise() ? new PerlinSimplexNoise(this.random, IntStream.rangeClosed(-3, 0)) : new PerlinNoise(this.random, IntStream.rangeClosed(-3, 0)));
 		this.random.consumeCount(2620);
 		this.depthNoise = new BetterNoise(this.random, IntStream.rangeClosed(-15, 0));
 
 		if (noiseSettings.islandNoiseOverride()) {
-			WorldgenRandom worldgenRandom = new WorldgenRandom(l);
-			worldgenRandom.consumeCount(17292);
-			this.islandNoise = new SimplexNoise(worldgenRandom);
+			WorldgenRandom rand2 = new WorldgenRandom(l);
+			rand2.consumeCount(17292);
+			this.islandNoise = new SimplexNoise(rand2);
 		} else {
 			this.islandNoise = null;
 		}
 
+		this.projectionNoise = new OpenSimplexNoise(this.random);
 		BiomeGenProperties.setupForChunkGen();
 	}
 
@@ -165,38 +168,39 @@ public class EpicFantasyChunkGenerator extends ChunkGenerator {
 		return this.seed == l && ((NoiseGeneratorSettings)this.settings.get()).stable(noiseGeneratorSettings);
 	}
 
-	private double sampleAndClampNoise(int i, int j, int k, double d, double e, double f, double g) {
+	private double sampleAndClampNoise(int x, int y, int z, double d, double e, double f, double g, float hilliness) {
 		double h = 0.0D;
 		double l = 0.0D;
 		double m = 0.0D;
 		double n = 1.0D;
 
 		for(int o = 0; o < 16; ++o) {
-			double p = PerlinNoise.wrap((double)i * d * n);
-			double q = PerlinNoise.wrap((double)j * e * n);
-			double r = PerlinNoise.wrap((double)k * d * n);
+			double p = PerlinNoise.wrap((double)x * d * n);
+			double q = PerlinNoise.wrap((double)y * e * n);
+			double r = PerlinNoise.wrap((double)z * d * n);
 			double s = e * n;
-			OpenSimplexGenNoise improvedNoise = this.minLimitPerlinNoise.getOctaveNoise(o);
+			OpenSimplexGenNoise improvedNoise = this.minLimitNoise.getOctaveNoise(o);
 			if (improvedNoise != null) {
-				h += improvedNoise.noise(p, q, r, s, (double)j * s) / n;
+				h += improvedNoise.noise(p, q, r, s, (double)y * s) / n;
 			}
 
-			OpenSimplexGenNoise improvedNoise2 = this.maxLimitPerlinNoise.getOctaveNoise(o);
+			OpenSimplexGenNoise improvedNoise2 = this.maxLimitNoise.getOctaveNoise(o);
 			if (improvedNoise2 != null) {
-				l += improvedNoise2.noise(p, q, r, s, (double)j * s) / n;
+				l += improvedNoise2.noise(p, q, r, s, (double)y * s) / n;
 			}
 
 			if (o < 8) {
-				OpenSimplexGenNoise improvedNoise3 = this.mainPerlinNoise.getOctaveNoise(o);
+				OpenSimplexGenNoise improvedNoise3 = this.mainNoise.getOctaveNoise(o);
 				if (improvedNoise3 != null) {
-					m += improvedNoise3.noise(PerlinNoise.wrap((double)i * f * n), PerlinNoise.wrap((double)j * g * n), PerlinNoise.wrap((double)k * f * n), g * n, (double)j * g * n) / n;
+					m += improvedNoise3.noise(PerlinNoise.wrap((double)x * f * n), PerlinNoise.wrap((double)y * g * n), PerlinNoise.wrap((double)z * f * n), g * n, (double)y * g * n) / n;
 				}
 			}
 
 			n /= 2.0D;
 		}
 
-		return Mth.clampedLerp(h / 512.0D, l / 512.0D, (m / 10.0D + 1.0D) / 2.0D);
+		// vanilla uses 10.0D instead of 15.0D
+		return Mth.clampedLerp(hilliness * h / 512.0D, hilliness * l / 512.0D, (m / 15.0D + 1.0D) / 2.0D);
 	}
 
 	private double[] makeAndFillNoiseColumn(int i, int j) {
@@ -213,6 +217,9 @@ public class EpicFantasyChunkGenerator extends ChunkGenerator {
 		double progress;
 		double topSlideSize;
 
+		int seaLevel = this.getSeaLevel();
+		GenerationProperties centralProperties = BiomeGenProperties.getGenerationProperties(this.biomeSource.getNoiseBiome(genX, seaLevel, genZ));
+
 		if (this.islandNoise != null) {
 			ac = (double)(TheEndBiomeSource.getHeightValue(this.islandNoise, genX, genZ) - 8.0F);
 			if (ac > 0.0D) {
@@ -224,16 +231,17 @@ public class EpicFantasyChunkGenerator extends ChunkGenerator {
 			float finalSummedScale = 0.0F;
 			float finalSummedDepth = 0.0F;
 			float totalWeight = 0.0F;
-			int seaLevel = this.getSeaLevel();
-			BiomeGenProperties.BiomeEntry central = BiomeGenProperties.getGenerationProperties(this.biomeSource.getNoiseBiome(genX, seaLevel, genZ));
-			float centralBiomeDepth = central.depth;
-			int smoothness = central.smoothness;
+
+			float projectionNoise = (float) this.projectionNoise.sample(genX * centralProperties.projectionPeriod, genZ * centralProperties.projectionPeriod);
+			float centralBiomeDepth = centralProperties.depth + centralProperties.projection * projectionNoise;
+			int smoothness = centralProperties.interpolation;
 			int smoothnessUpper = smoothness * 2 + 1;
 
 			for(int genXOff = -smoothness; genXOff <= smoothness; ++genXOff) {
 				for(int genZOff = -smoothness; genZOff <= smoothness; ++genZOff) {
-					BiomeGenProperties.BiomeEntry biomeProperties = BiomeGenProperties.getGenerationProperties(this.biomeSource.getNoiseBiome(genX + genXOff, seaLevel, genZ + genZOff));
-					float depth = biomeProperties.depth;
+					GenerationProperties biomeProperties = BiomeGenProperties.getGenerationProperties(this.biomeSource.getNoiseBiome(genX + genXOff, seaLevel, genZ + genZOff));
+					projectionNoise = (float) this.projectionNoise.sample((genX + genXOff) * biomeProperties.projectionPeriod, (genZ + genZOff) * biomeProperties.projectionPeriod);
+					float depth = biomeProperties.depth + biomeProperties.projection * projectionNoise;
 					float scale = biomeProperties.scale;
 					float trueNoiseDepth;
 					float trueNoiseScale;
@@ -262,8 +270,8 @@ public class EpicFantasyChunkGenerator extends ChunkGenerator {
 			ad = 96.0D / topSlideSize;
 		}
 
-		double ae = 684.412D * noiseSettings.noiseSamplingSettings().xzScale();
-		double af = 684.412D * noiseSettings.noiseSamplingSettings().yScale();
+		double ae = 684.412D * centralProperties.period * noiseSettings.noiseSamplingSettings().xzScale();
+		double af = 684.412D * centralProperties.period * noiseSettings.noiseSamplingSettings().yScale();
 		double ag = ae / noiseSettings.noiseSamplingSettings().xzFactor();
 		double ah = af / noiseSettings.noiseSamplingSettings().yFactor();
 		progress = (double)noiseSettings.topSlideSettings().target();
@@ -277,7 +285,7 @@ public class EpicFantasyChunkGenerator extends ChunkGenerator {
 		double densityOffset = noiseSettings.densityOffset();
 
 		for(int genY = 0; genY <= this.chunkCountY; ++genY) {
-			double value = this.sampleAndClampNoise(genX, genY, genZ, ae, af, ag, ah);
+			double value = this.sampleAndClampNoise(genX, genY, genZ, ae, af, ag, ah, centralProperties.hilliness);
 			double rawDensity = 1.0D - (double)genY * 2.0D / (double)this.chunkCountY + densityRandomOffset;
 			double density = rawDensity * densityFactor + densityOffset;
 			double processedDensity = (density + ac) * ad;

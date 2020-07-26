@@ -207,7 +207,8 @@ public class Metallurgy {
 						silicaSand.defaultBlockState(),
 						silicaSand.defaultBlockState(),
 						Blocks.GRAVEL.defaultBlockState()))
-				));
+				)
+				.addDefaultFeatures(true, true));
 
 		silicaSandDesert = Game.addBiome(new BiomeGen(new BiomeGen.Properties("silica_sand_desert", Biome.BiomeCategory.BEACH)
 				.shape(Biomes.DESERT.getDepth(), Biomes.DESERT.getScale())
@@ -215,7 +216,8 @@ public class Metallurgy {
 						silicaSand.defaultBlockState(),
 						silicaSandstone.defaultBlockState(),
 						Blocks.GRAVEL.defaultBlockState()))
-				));
+				)
+				.addDefaultFeatures(false, true));
 
 		FabricBiomes.addSpawnBiome(silicaSandBeach);
 		FabricBiomes.addSpawnBiome(silicaSandDesert);
