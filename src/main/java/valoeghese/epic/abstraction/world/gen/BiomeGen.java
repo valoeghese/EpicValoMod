@@ -21,7 +21,12 @@ public class BiomeGen extends Biome {
 
 		BiomeDefaultFeatures.addSurfaceFreezing(this);
 		((DelegatingSurfaceBuilder) this.getSurfaceBuilder().get().surfaceBuilder).delegate = this;
-		this.location = new ResourceLocation(Game.primedId, properties.name);
+
+		if (properties.name.contains(":")) {
+			this.location = new ResourceLocation(properties.name);
+		} else {
+			this.location = new ResourceLocation(Game.primedId, properties.name);
+		}
 	}
 
 	public final ResourceLocation location;

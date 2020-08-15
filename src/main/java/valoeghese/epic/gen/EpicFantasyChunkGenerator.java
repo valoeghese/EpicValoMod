@@ -54,6 +54,8 @@ import net.minecraft.world.level.levelgen.synth.PerlinNoise;
 import net.minecraft.world.level.levelgen.synth.PerlinSimplexNoise;
 import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 import net.minecraft.world.level.levelgen.synth.SurfaceNoise;
+import valoeghese.epic.gen.deobf.BiomeGenProperties;
+import valoeghese.epic.gen.deobf.GenerationProperties;
 import valoeghese.epic.util.BetterNoise;
 import valoeghese.epic.util.OpenSimplexGenNoise;
 import valoeghese.epic.util.OpenSimplexNoise;

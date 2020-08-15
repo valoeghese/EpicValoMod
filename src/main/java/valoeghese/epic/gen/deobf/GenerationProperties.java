@@ -1,6 +1,6 @@
-package valoeghese.epic.gen;
+package valoeghese.epic.gen.deobf;
 
-import static valoeghese.epic.gen.BiomeGenProperties.FORMAT;
+import static valoeghese.epic.gen.deobf.BiomeGenProperties.FORMAT;
 
 public class GenerationProperties {
 	private GenerationProperties(float depth, float projection, float projectionPeriod, float scale, int interpolation, float hilliness, float period) {
@@ -73,7 +73,7 @@ public class GenerationProperties {
 					.append(indent).append("    .depthScale(").append(FORMAT.format(this.depth)).append(", ").append(FORMAT.format(this.scale)).append(")");
 
 			if (this.projection != 0.0f) {
-				result.append("\n").append(indent).append("    .projection(").append(FORMAT.format(this.period)).append(", ").append(FORMAT.format(this.projectionPeriod)).append(")");
+				result.append("\n").append(indent).append("    .projection(").append(FORMAT.format(this.projection)).append(", ").append(FORMAT.format(this.projectionPeriod)).append(")");
 			}
 
 			if (this.interpolation != 2) {

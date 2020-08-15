@@ -1,4 +1,4 @@
-package valoeghese.epic.gen;
+package valoeghese.epic.gen.deobf;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,22 +40,26 @@ public class BiomeGenProperties extends ScriptManager {
 
 				pr.println(addBiomeJs(new JSBiome("epic_fantasy:rolling_plains", "plains")
 						.vanillaShape(0.1f, 0.25f)
+						.climate(0.8f, 0.4f)
 						.addLakes(true)
 						.vanillaReplaceGen("minecraft:plains", 0.4f)
 						.decorations(new Decorations.PresetCombo()
 								.setGroundFoliage(DecorationCategory.PLAINS))));
 
 				pr.println(setGenPropertiesJs("epic_fantasy:rolling_plains", new GenerationProperties.Builder()
-						.depthScale(0.185f, 0.075f)
-						.projection(0.65f, 0.11f)
+						.depthScale(0.25f, 0.075f)
+						.periodFactor(1.5f) // we're using projection (depth modulation), so stretching out the main scale might make vanilla's scale less pronounced
+						.projection(0.9f, 0.165f)
 						.interpolation(3)));
 			}, true);
 
 			ScriptContext context = new ScriptContext();
-			context.addFunctionDefinition("setGenerationProperties", BiomeGenProperties.class, "setGenerationProperties", 6);
+			context.addFunctionDefinition("setGenerationProperties", BiomeGenProperties.class, "setGenerationProperties", 2);
 			context.addFunctionDefinition("addBiome", BiomeGenProperties.class, "addBiome", 1);
 			context.addClassDefinition("Biome", JSBiome.class);
 			context.addClassDefinition("Decorations", Decorations.class);
+			context.addClassDefinition("DecorationCategory", DecorationCategory.class);
+			context.addClassDefinition("GenerationProperties", GenerationProperties.Builder.class);
 			context.addClassDefinition("Climate", OverworldClimate.class);
 			context.runScript(biomeGen);
 		} catch (IOException e) {
@@ -73,7 +77,7 @@ public class BiomeGenProperties extends ScriptManager {
 	}
 
 	private static String addBiomeJs(JSBiome biome) {
-		StringBuilder result = new StringBuilder("addBiome(new Biome(\"").append(biome.properties).append("\", \"").append(biome.properties.category.getName()).append("\")\n")
+		StringBuilder result = new StringBuilder("addBiome(new Biome(\"").append(biome.properties.name).append("\", \"").append(biome.properties.category.getName()).append("\")\n")
 				.append("    .vanillaShape(").append(FORMAT.format(biome.properties.getTemperature())).append(", ").append(FORMAT.format(biome.properties.getRainfall())).append(")\n")
 				.append("    .climate(").append(FORMAT.format(biome.properties.getTemperature())).append(", ").append(FORMAT.format(biome.properties.getRainfall())).append(")\n")
 				.append("    .addLakes(").append(biome.lakes).append(")\n")
@@ -121,7 +125,6 @@ public class BiomeGenProperties extends ScriptManager {
 		BiomeGen biome = new BiomeGen(jsBiome.properties);
 		biome.addDefaultFeatures(jsBiome.lakes, false);
 		jsBiome.decorations.addDecorations(biome);
-		Game.addBiome(biome);
 
 		if (jsBiome.climate != null) {
 			OverworldBiomes.addContinentalBiome(biome, jsBiome.climate, jsBiome.genWeight);
@@ -333,8 +336,8 @@ public class BiomeGenProperties extends ScriptManager {
 			@Override
 			protected String toJS(String defaultIndent) {
 				return new StringBuilder("new Decorations.PresetCombo()\n")
-						.append(defaultIndent).append("    .setGroundFoliage(DecorationType.").append(this.groundFoliage.toString()).append(")\n")
-						.append(defaultIndent).append("    .setTreeFoliage(DecorationType.").append(this.treeFoliage.toString()).append(")\n")
+						.append(defaultIndent).append("    .setGroundFoliage(DecorationCategory.").append(this.groundFoliage.toString()).append(")\n")
+						.append(defaultIndent).append("    .setTreeFoliage(DecorationCategory.").append(this.treeFoliage.toString()).append(")\n")
 						.append(defaultIndent).append("    .setSpawns(DecorationCategory.").append(this.spawns.toString()).append(")")
 						.toString();
 			}
