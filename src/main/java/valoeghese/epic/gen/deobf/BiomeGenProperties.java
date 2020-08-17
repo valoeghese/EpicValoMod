@@ -27,6 +27,7 @@ import valoeghese.epic.abstraction.Logger;
 import valoeghese.epic.abstraction.ScriptManager;
 import valoeghese.epic.abstraction.core.Game;
 import valoeghese.epic.abstraction.world.gen.BiomeGen;
+import valoeghese.epic.gen.Gen;
 
 public class BiomeGenProperties extends ScriptManager {
 	public static final DecimalFormat FORMAT = new DecimalFormat("###.###");
@@ -48,6 +49,15 @@ public class BiomeGenProperties extends ScriptManager {
 						.vanillaReplaceGen("minecraft:plains", 0.4f)
 						.decorations(new Decorations.PresetCombo()
 								.setGroundFoliage(DecorationCategory.PLAINS))));
+
+				pr.println(addBiomeJs(new JSBiome("epic_fantasy:grove", "forest")
+						.vanillaShape(0.2f, 0.025f)
+						.climate(0.6f, 0.5f)
+						.addLakes(true)
+						.vanillaBaseGen(OverworldClimate.TEMPERATE, 0.25f)
+						.decorations(new Decorations.PresetCombo()
+								.setGroundFoliage(DecorationCategory.FOREST)
+								.setTreeFoliage(DecorationCategory.FOREST_SPARSE_TREES))));
 
 				pr.println(setGenPropertiesJs("epic_fantasy:rolling_plains", new GenerationProperties.Builder()
 						.depthScale(0.25f, 0.075f)
@@ -312,6 +322,7 @@ public class BiomeGenProperties extends ScriptManager {
 					BiomeDefaultFeatures.addDesertExtraDecoration(biome);
 					break;
 				case FOREST:
+				case FOREST_SPARSE_TREES:
 				default:
 					BiomeDefaultFeatures.addDefaultFlowers(biome);
 					BiomeDefaultFeatures.addDefaultGrass(biome);
@@ -352,6 +363,9 @@ public class BiomeGenProperties extends ScriptManager {
 				}
 
 				switch (this.treeFoliage) {
+				case FOREST_SPARSE_TREES:
+					biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Gen.groveTrees);
+					break;
 				case FOREST:
 					BiomeDefaultFeatures.addOtherBirchTrees(biome);
 					break;
@@ -379,6 +393,7 @@ public class BiomeGenProperties extends ScriptManager {
 					BiomeDefaultFeatures.desertSpawns(biome);
 					break;
 				case FOREST:
+				case FOREST_SPARSE_TREES:
 					BiomeDefaultFeatures.farmAnimals(biome);
 					BiomeDefaultFeatures.commonSpawns(biome);
 					biome.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.WOLF, 5, 4, 4));
@@ -427,6 +442,7 @@ public class BiomeGenProperties extends ScriptManager {
 		TAIGA,
 		JUNGLE,
 		MESA,
-		DESERT
+		DESERT,
+		FOREST_SPARSE_TREES
 	}
 }

@@ -23,6 +23,10 @@ public class Setup {
 		Gen.loadGenScripts();
 	}
 
+	public static void setupRPG() {
+		Logger.info("RPG", "Setting Up!");
+	}
+
 	@Priority(-1)
 	@Client
 	public static void setupWorldPreset() {
