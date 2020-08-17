@@ -1,4 +1,4 @@
-package valoeghese.epic.mixin;
+package valoeghese.epic.test.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;

@@ -41,6 +41,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.NoiseSettings;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
@@ -60,7 +61,7 @@ import valoeghese.epic.util.BetterNoise;
 import valoeghese.epic.util.OpenSimplexGenNoise;
 import valoeghese.epic.util.OpenSimplexNoise;
 
-public final class EpicFantasyChunkGenerator extends ChunkGenerator {
+public final class EpicFantasyChunkGenerator extends NoiseBasedChunkGenerator {
 	public static final Codec<EpicFantasyChunkGenerator> CODEC = RecordCodecBuilder.create((instance) -> {
 		return instance.group(BiomeSource.CODEC.fieldOf("biome_source").forGetter((EpicFantasyChunkGenerator) -> {
 			return EpicFantasyChunkGenerator.biomeSource;
@@ -124,7 +125,7 @@ public final class EpicFantasyChunkGenerator extends ChunkGenerator {
 	}
 
 	private EpicFantasyChunkGenerator(BiomeSource biomeSource, BiomeSource biomeSource2, long l, Supplier<NoiseGeneratorSettings> supplier) {
-		super(biomeSource, biomeSource2, ((NoiseGeneratorSettings)supplier.get()).structureSettings(), l);
+		super(biomeSource, biomeSource2, l, supplier);
 		this.seed = l;
 		NoiseGeneratorSettings noiseGeneratorSettings = (NoiseGeneratorSettings)supplier.get();
 		this.settings = supplier;
@@ -162,47 +163,49 @@ public final class EpicFantasyChunkGenerator extends ChunkGenerator {
 	}
 
 	@Environment(EnvType.CLIENT)
+	@Override
 	public ChunkGenerator withSeed(long l) {
 		return new EpicFantasyChunkGenerator(this.biomeSource.withSeed(l), l, this.settings);
 	}
 
+	@Override
 	public boolean stable(long l, NoiseGeneratorSettings noiseGeneratorSettings) {
 		return this.seed == l && ((NoiseGeneratorSettings)this.settings.get()).stable(noiseGeneratorSettings);
 	}
 
-	private double sampleAndClampNoise(int x, int y, int z, double d, double e, double f, double g, float hilliness) {
-		double h = 0.0D;
-		double l = 0.0D;
-		double m = 0.0D;
-		double n = 1.0D;
+	private double sampleAndClampNoise(int x, int y, int z, double horizontalNoiseScale, double verticalNoiseScale, double horizontalProgressScale, double verticalProgressScale, float hilliness) {
+		double lowerLimit = 0.0D;
+		double upperLimit = 0.0D;
+		double progress = 0.0D;
+		double amplitude = 1.0D;
 
-		for(int o = 0; o < 16; ++o) {
-			double p = PerlinNoise.wrap((double)x * d * n);
-			double q = PerlinNoise.wrap((double)y * e * n);
-			double r = PerlinNoise.wrap((double)z * d * n);
-			double s = e * n;
-			OpenSimplexGenNoise improvedNoise = this.minLimitNoise.getOctaveNoise(o);
+		for(int sampler = 0; sampler < 16; ++sampler) {
+			double p = PerlinNoise.wrap((double)x * horizontalNoiseScale * amplitude);
+			double q = PerlinNoise.wrap((double)y * verticalNoiseScale * amplitude);
+			double r = PerlinNoise.wrap((double)z * horizontalNoiseScale * amplitude);
+			double s = verticalNoiseScale * amplitude;
+			OpenSimplexGenNoise improvedNoise = this.minLimitNoise.getOctaveNoise(sampler);
 			if (improvedNoise != null) {
-				h += improvedNoise.noise(p, q, r, s, (double)y * s) / n;
+				lowerLimit += improvedNoise.noise(p, q, r, s, (double)y * s) / amplitude;
 			}
 
-			OpenSimplexGenNoise improvedNoise2 = this.maxLimitNoise.getOctaveNoise(o);
+			OpenSimplexGenNoise improvedNoise2 = this.maxLimitNoise.getOctaveNoise(sampler);
 			if (improvedNoise2 != null) {
-				l += improvedNoise2.noise(p, q, r, s, (double)y * s) / n;
+				upperLimit += improvedNoise2.noise(p, q, r, s, (double)y * s) / amplitude;
 			}
 
-			if (o < 8) {
-				OpenSimplexGenNoise improvedNoise3 = this.mainNoise.getOctaveNoise(o);
+			if (sampler < 8) {
+				OpenSimplexGenNoise improvedNoise3 = this.mainNoise.getOctaveNoise(sampler);
 				if (improvedNoise3 != null) {
-					m += improvedNoise3.noise(PerlinNoise.wrap((double)x * f * n), PerlinNoise.wrap((double)y * g * n), PerlinNoise.wrap((double)z * f * n), g * n, (double)y * g * n) / n;
+					progress += improvedNoise3.noise(PerlinNoise.wrap((double)x * horizontalProgressScale * amplitude), PerlinNoise.wrap((double)y * verticalProgressScale * amplitude), PerlinNoise.wrap((double)z * horizontalProgressScale * amplitude), verticalProgressScale * amplitude, (double)y * verticalProgressScale * amplitude) / amplitude;
 				}
 			}
 
-			n /= 2.0D;
+			amplitude /= 2.0D;
 		}
 
-		// vanilla uses 10.0D instead of 15.0D
-		return Mth.clampedLerp(hilliness * h / 512.0D, hilliness * l / 512.0D, (m / 15.0D + 1.0D) / 2.0D);
+		// vanilla uses 10.0D instead of 14.0D
+		return Mth.clampedLerp(hilliness * lowerLimit / 512.0D, hilliness * upperLimit / 512.0D, (progress / 14.0D + 1.0D) / 2.0D);
 	}
 
 	private double[] makeAndFillNoiseColumn(int i, int j) {
@@ -234,7 +237,7 @@ public final class EpicFantasyChunkGenerator extends ChunkGenerator {
 			float finalSummedDepth = 0.0F;
 			float totalWeight = 0.0F;
 
-			float projectionNoise = (float) this.projectionNoise.sample(genX * centralProperties.projectionPeriod, genZ * centralProperties.projectionPeriod);
+			float projectionNoise = (float) this.projectionNoise.sample(genX * centralProperties.projectionFrequency, genZ * centralProperties.projectionFrequency);
 			float centralBiomeDepth = centralProperties.depth + centralProperties.projection * projectionNoise;
 			int smoothness = centralProperties.interpolation;
 			int smoothnessUpper = smoothness * 2 + 1;
@@ -242,7 +245,7 @@ public final class EpicFantasyChunkGenerator extends ChunkGenerator {
 			for(int genXOff = -smoothness; genXOff <= smoothness; ++genXOff) {
 				for(int genZOff = -smoothness; genZOff <= smoothness; ++genZOff) {
 					GenerationProperties biomeProperties = BiomeGenProperties.getGenerationProperties(this.biomeSource.getNoiseBiome(genX + genXOff, seaLevel, genZ + genZOff));
-					projectionNoise = (float) this.projectionNoise.sample((genX + genXOff) * biomeProperties.projectionPeriod, (genZ + genZOff) * biomeProperties.projectionPeriod);
+					projectionNoise = (float) this.projectionNoise.sample((genX + genXOff) * biomeProperties.projectionFrequency, (genZ + genZOff) * biomeProperties.projectionFrequency);
 					float depth = biomeProperties.depth + biomeProperties.projection * projectionNoise;
 					float scale = biomeProperties.scale;
 					float trueNoiseDepth;
@@ -272,8 +275,8 @@ public final class EpicFantasyChunkGenerator extends ChunkGenerator {
 			ad = 96.0D / topSlideSize;
 		}
 
-		double ae = 684.412D * centralProperties.period * noiseSettings.noiseSamplingSettings().xzScale();
-		double af = 684.412D * centralProperties.period * noiseSettings.noiseSamplingSettings().yScale();
+		double ae = (684.412D / centralProperties.period) * noiseSettings.noiseSamplingSettings().xzScale();
+		double af = (684.412D / centralProperties.period) * noiseSettings.noiseSamplingSettings().yScale();
 		double ag = ae / noiseSettings.noiseSamplingSettings().xzFactor();
 		double ah = af / noiseSettings.noiseSamplingSettings().yFactor();
 		progress = (double)noiseSettings.topSlideSettings().target();
@@ -326,10 +329,12 @@ public final class EpicFantasyChunkGenerator extends ChunkGenerator {
 		return g < 0.0D ? g * 0.009486607142857142D : Math.min(g, 1.0D) * 0.006640625D;
 	}
 
+	@Override
 	public int getBaseHeight(int i, int j, Heightmap.Types types) {
 		return this.iterateNoiseColumn(i, j, (BlockState[])null, types.isOpaque());
 	}
 
+	@Override
 	public BlockGetter getBaseColumn(int i, int j) {
 		BlockState[] blockStates = new BlockState[this.chunkCountY * this.chunkHeight];
 		this.iterateNoiseColumn(i, j, blockStates, null);
@@ -373,6 +378,7 @@ public final class EpicFantasyChunkGenerator extends ChunkGenerator {
 		return 0;
 	}
 
+	@Override
 	protected BlockState generateBaseState(double d, int i) {
 		BlockState blockState3;
 		if (d > 0.0D) {
@@ -386,6 +392,7 @@ public final class EpicFantasyChunkGenerator extends ChunkGenerator {
 		return blockState3;
 	}
 
+	@Override
 	public void buildSurfaceAndBedrock(WorldGenRegion level, ChunkAccess chunk) {
 		ChunkPos chunkPos = chunk.getPos();
 		int i = chunkPos.x;
@@ -432,6 +439,7 @@ public final class EpicFantasyChunkGenerator extends ChunkGenerator {
 		}
 	}
 
+	@Override
 	public void fillFromNoise(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkAccess chunk) {
 		ObjectList<StructurePiece> objectList = new ObjectArrayList<>(10);
 		ObjectList<JigsawJunction> objectList2 = new ObjectArrayList<>(32);
@@ -622,14 +630,17 @@ public final class EpicFantasyChunkGenerator extends ChunkGenerator {
 		return h * g;
 	}
 
+	@Override
 	public int getGenDepth() {
 		return this.height;
 	}
 
+	@Override
 	public int getSeaLevel() {
 		return ((NoiseGeneratorSettings)this.settings.get()).seaLevel();
 	}
 
+	@Override
 	public List<Biome.SpawnerData> getMobsAt(Biome biome, StructureFeatureManager sfManager, MobCategory mobCategory, BlockPos pos) {
 		if (sfManager.getStructureAt(pos, true, StructureFeature.SWAMP_HUT).isValid()) {
 			if (mobCategory == MobCategory.MONSTER) {
@@ -658,6 +669,7 @@ public final class EpicFantasyChunkGenerator extends ChunkGenerator {
 		return super.getMobsAt(biome, sfManager, mobCategory, pos);
 	}
 
+	@Override
 	public void spawnOriginalMobs(WorldGenRegion level) {
 		int centerX = level.getCenterX();
 		int centerZ = level.getCenterZ();

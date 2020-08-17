@@ -1,4 +1,4 @@
-package valoeghese.epic.mixin;
+package valoeghese.epic.test.mixin;
 
 import java.util.function.Supplier;
 
@@ -20,7 +20,6 @@ import net.minecraft.world.level.levelgen.WorldGenSettings;
 import valoeghese.epic.gen.EpicFantasyChunkGenerator;
 
 @Mixin(WorldPreset.class)
-// TODO do I keep this in prod? Or make it optional
 public abstract class MixinCustomSingleBiome {
 	@Shadow
 	@Final
@@ -50,7 +49,7 @@ public abstract class MixinCustomSingleBiome {
 					),
 			method = "fromBuffetSettings(Lnet/minecraft/world/level/levelgen/WorldGenSettings;Lnet/minecraft/client/gui/screens/worldselection/WorldPreset;Lnet/minecraft/world/level/biome/Biome;)Lnet/minecraft/world/level/levelgen/WorldGenSettings;"
 			)
-	private ChunkGenerator epic_putCustomGenerator2(BiomeSource biomeSource, long l, Supplier<NoiseGeneratorSettings> supplier,/**/ WorldGenSettings sparam, WorldPreset presetparam, Biome biomeparam) {
+	private static NoiseBasedChunkGenerator epic_putCustomGenerator2(BiomeSource biomeSource, long l, Supplier<NoiseGeneratorSettings> supplier,/**/ WorldGenSettings sparam, WorldPreset presetparam, Biome biomeparam) {
 		if (presetparam == SINGLE_BIOME_SURFACE) {
 			return new EpicFantasyChunkGenerator(biomeSource, l, supplier);
 		} else {

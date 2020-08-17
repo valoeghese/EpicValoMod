@@ -3,10 +3,10 @@ package valoeghese.epic.gen.deobf;
 import static valoeghese.epic.gen.deobf.BiomeGenProperties.FORMAT;
 
 public class GenerationProperties {
-	private GenerationProperties(float depth, float projection, float projectionPeriod, float scale, int interpolation, float hilliness, float period) {
+	private GenerationProperties(float depth, float projection, float projectionFrequency, float scale, int interpolation, float hilliness, float period) {
 		this.depth = depth;
 		this.projection = projection;
-		this.projectionPeriod = projectionPeriod;
+		this.projectionFrequency = projectionFrequency;
 		this.scale = scale;
 		this.interpolation = interpolation;
 		this.hilliness = hilliness;
@@ -15,7 +15,7 @@ public class GenerationProperties {
 
 	public final float depth;
 	public final float projection;
-	public final float projectionPeriod;
+	public final float projectionFrequency;
 	public final float scale;
 	public final int interpolation;
 	public final float hilliness;
@@ -24,9 +24,9 @@ public class GenerationProperties {
 	public static class Builder {
 		private float depth = 0.0f;
 		private float projection = 0.0f;
-		private float projectionPeriod = 0.0f;
+		private float projectionFrequency = 0.0f;
 		private float scale = 0.0f;
-		private int interpolation = 2;
+		private int interpolation = 4; // VANILLA DEFAULT = 2
 		private float hilliness = 1.0f;
 		private float period = 1.0f;
 
@@ -36,9 +36,9 @@ public class GenerationProperties {
 			return this;
 		}
 
-		public Builder projection(float projection, float projectionPeriod) {
+		public Builder projection(float projection, float projectionFrequency) {
 			this.projection = projection;
-			this.projectionPeriod = projectionPeriod;
+			this.projectionFrequency = projectionFrequency;
 			return this;
 		}
 
@@ -61,7 +61,7 @@ public class GenerationProperties {
 			return new GenerationProperties(
 					this.depth,
 					this.projection,
-					this.projectionPeriod,
+					this.projectionFrequency,
 					this.scale,
 					this.interpolation,
 					this.hilliness,
@@ -73,7 +73,7 @@ public class GenerationProperties {
 					.append(indent).append("    .depthScale(").append(FORMAT.format(this.depth)).append(", ").append(FORMAT.format(this.scale)).append(")");
 
 			if (this.projection != 0.0f) {
-				result.append("\n").append(indent).append("    .projection(").append(FORMAT.format(this.projection)).append(", ").append(FORMAT.format(this.projectionPeriod)).append(")");
+				result.append("\n").append(indent).append("    .projection(").append(FORMAT.format(this.projection)).append(", ").append(FORMAT.format(this.projectionFrequency)).append(")");
 			}
 
 			if (this.interpolation != 2) {

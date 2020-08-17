@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "valoeghese.epic.test.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+  ],
+  "client": [
+    "AccessorWorldPreset",
+    "MixinCustomSingleBiome"
+  ],
+  "server": [
+  ]
+}

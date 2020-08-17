@@ -23,15 +23,18 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderBaseConfiguration;
+import valoeghese.epic.abstraction.Logger;
 import valoeghese.epic.abstraction.ScriptManager;
 import valoeghese.epic.abstraction.core.Game;
 import valoeghese.epic.abstraction.world.gen.BiomeGen;
 
 public class BiomeGenProperties extends ScriptManager {
 	public static final DecimalFormat FORMAT = new DecimalFormat("###.###");
+	private static boolean addedBiomes = false;
 
 	public BiomeGenProperties() {
 		INSTANCE = this;
+		Logger.info("Gen", "Loading Biome Gen Script.");
 		File biomeGen = getScript("biomeGen");
 		//pr.println(setGenPropertiesJs("minecraft:forest", 0.3f, 0.5f, 0.09f, 0.1f, 4));
 		try {
@@ -49,8 +52,70 @@ public class BiomeGenProperties extends ScriptManager {
 				pr.println(setGenPropertiesJs("epic_fantasy:rolling_plains", new GenerationProperties.Builder()
 						.depthScale(0.25f, 0.075f)
 						.periodFactor(1.5f) // we're using projection (depth modulation), so stretching out the main scale might make vanilla's scale less pronounced
-						.projection(0.9f, 0.165f)
-						.interpolation(3)));
+						.projection(1.15f, 0.105f)
+						.interpolation(5)));
+
+				pr.println();
+				pr.println("// Vanilla Biomes");
+
+				pr.println(setGenPropertiesJs("minecraft:plains", new GenerationProperties.Builder()
+						.depthScale(0.1f, 0.02f)
+						.periodFactor(1.5f)
+						.interpolation(5)));
+
+				pr.println(setGenPropertiesJs("minecraft:sunflower_plains", new GenerationProperties.Builder()
+						.depthScale(0.125f, 0.02f)
+						.periodFactor(1.5f)
+						.interpolation(5)));
+
+				GenerationProperties.Builder mtnsGen = new GenerationProperties.Builder()
+						.depthScale(1.4f, 0.4f)
+						.periodFactor(2.3f)
+						.hillinessFactor(2.0f)
+						.interpolation(8)
+						.projection(1.6f, 0.05f);
+
+				pr.println(setGenPropertiesJs("minecraft:river", new GenerationProperties.Builder()
+						.depthScale(-0.7f, 0.0f)
+						.periodFactor(1.5f)
+						.interpolation(6)));
+
+				pr.println(setGenPropertiesJs("minecraft:mountains", mtnsGen));
+				pr.println(setGenPropertiesJs("minecraft:mountain_edge", mtnsGen
+						.depthScale(0.5f, 0.2f)
+						.hillinessFactor(1.5f)
+						.projection(0.0f, 1.0f)));
+				pr.println(setGenPropertiesJs("minecraft:wooded_mountains", mtnsGen
+						.depthScale(1.4f, 0.25f)
+						.hillinessFactor(1.75f)));
+				pr.println(setGenPropertiesJs("minecraft:gravelly_mountains", mtnsGen));
+				pr.println(setGenPropertiesJs("minecraft:stone_shore", mtnsGen
+						.depthScale(0.0f, 0.18f)
+						.hillinessFactor(1.0f)
+						.projection(0.0f, 1.0f)));
+
+				pr.println(setGenPropertiesJs("minecraft:taiga", new GenerationProperties.Builder()
+						.depthScale(0.1f, 0.2f)
+						.periodFactor(1.6f)
+						.interpolation(5)
+						.projection(0.4f, 0.09f)));
+
+				pr.println(setGenPropertiesJs("minecraft:taiga_hills", new GenerationProperties.Builder()
+						.depthScale(0.45f, 0.3f)
+						.periodFactor(1.6f)
+						.interpolation(5)
+						.projection(0.4f, 0.09f)));
+
+				pr.println(setGenPropertiesJs("minecraft:desert_hills", new GenerationProperties.Builder()
+						.depthScale(0.45f, 0.3f)
+						.periodFactor(2.3f)
+						.interpolation(6)
+						.projection(0.9f, 0.2f)));
+
+				pr.println(setGenPropertiesJs("minecraft:desert", new GenerationProperties.Builder()
+						.depthScale(0.15f, 0.0f)
+						.periodFactor(2.3f)
+						.interpolation(6)));
 			}, true);
 
 			ScriptContext context = new ScriptContext();
@@ -67,6 +132,8 @@ public class BiomeGenProperties extends ScriptManager {
 		} catch (ScriptException e) {
 			throw new RuntimeException("Error running script!", e);
 		}
+
+		addedBiomes = true;
 	}
 
 	private static String setGenPropertiesJs(String id, GenerationProperties.Builder builder) {
@@ -98,6 +165,10 @@ public class BiomeGenProperties extends ScriptManager {
 
 	public static void setupForChunkGen() {
 		INSTANCE.properties = new HashMap<>(INSTANCE.scriptedProperties);
+
+		synchronized (INSTANCE) {
+			RUNTIME_INSTANCE = INSTANCE;
+		}
 	}
 
 	public static void setGenerationProperties(String id, GenerationProperties.Builder builder) {
@@ -110,31 +181,36 @@ public class BiomeGenProperties extends ScriptManager {
 	private final Map<Biome, GenerationProperties> scriptedProperties = new HashMap<>();
 
 	private static BiomeGenProperties INSTANCE;
+	private static BiomeGenProperties RUNTIME_INSTANCE;
 
 	public static GenerationProperties getGenerationProperties(Biome biome) {
-		return INSTANCE.properties.computeIfAbsent(biome, b -> new GenerationProperties.Builder()
-				.depthScale(b.getDepth(), b.getScale())
-				.build());
+		synchronized (INSTANCE) {
+			return RUNTIME_INSTANCE.properties.computeIfAbsent(biome, b -> new GenerationProperties.Builder()
+					.depthScale(b.getDepth(), b.getScale())
+					.build());
+		}
 	}
 
 	public static void addBiome(JSBiome jsBiome) {
-		jsBiome.properties.surfaceBlocks(new SurfaceBuilderBaseConfiguration(
-				jsBiome.topBlock.defaultBlockState(),
-				jsBiome.underBlock.defaultBlockState(),
-				jsBiome.underwaterBlock.defaultBlockState()));
-		BiomeGen biome = new BiomeGen(jsBiome.properties);
-		biome.addDefaultFeatures(jsBiome.lakes, false);
-		jsBiome.decorations.addDecorations(biome);
+		if (!addedBiomes) {
+			jsBiome.properties.surfaceBlocks(new SurfaceBuilderBaseConfiguration(
+					jsBiome.topBlock.defaultBlockState(),
+					jsBiome.underBlock.defaultBlockState(),
+					jsBiome.underwaterBlock.defaultBlockState()));
+			BiomeGen biome = new BiomeGen(jsBiome.properties);
+			biome.addDefaultFeatures(jsBiome.lakes, false);
+			jsBiome.decorations.addDecorations(biome);
 
-		if (jsBiome.climate != null) {
-			OverworldBiomes.addContinentalBiome(biome, jsBiome.climate, jsBiome.genWeight);
+			if (jsBiome.climate != null) {
+				OverworldBiomes.addContinentalBiome(biome, jsBiome.climate, jsBiome.genWeight);
+			}
+
+			if (jsBiome.replaceBiome != null) {
+				OverworldBiomes.addBiomeVariant(BuiltinRegistries.BIOME.get(new ResourceLocation(jsBiome.replaceBiome)), biome, jsBiome.replaceChance);
+			}
+
+			Game.addBiome(biome);
 		}
-
-		if (jsBiome.replaceBiome != null) {
-			OverworldBiomes.addBiomeVariant(BuiltinRegistries.BIOME.get(new ResourceLocation(jsBiome.replaceBiome)), biome, jsBiome.replaceChance);
-		}
-
-		Game.addBiome(biome);
 	}
 
 	public static class JSBiome {

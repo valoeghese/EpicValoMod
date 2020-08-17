@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "epic_fantasy_test",
+  "version": "${version}",
+
+  "name": "Valoeghese's Epic Fantasy Test",
+  "description": "Epic Mod Tests",
+  "license": "All Rights Reserved",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+    ],
+    "client": [
+    ]
+  },
+  "mixins": [
+    "epic_fantasy_test.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.4.0"
+  }
+}
