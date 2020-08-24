@@ -1,7 +1,6 @@
 package valoeghese.epic.gen;
 
 import net.minecraft.client.gui.screens.worldselection.WorldPreset;
-import net.minecraft.world.level.biome.OverworldBiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 
@@ -11,7 +10,7 @@ public class GenClient {
 			@Override
 			protected ChunkGenerator generator(long seed) {
 				return new EpicFantasyChunkGenerator(
-						new OverworldBiomeSource(seed, false, false),
+						new EpicFantasyBiomeSource(seed),
 						seed,
 						() -> NoiseGeneratorSettings.OVERWORLD);
 			}
@@ -23,7 +22,6 @@ public class GenClient {
 			super(string);
 			WorldPreset.PRESETS.add(this);
 		}
-
 	}
 
 	public static WorldPreset epicFantasy;

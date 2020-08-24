@@ -5,6 +5,7 @@
   "mixins": [
     "MixinEaseBiomeEdgeLayer",
     "MixinLazyArea",
+    "MixinNaturalSpawner",
     "MixinOverworldBiomeSource"
   ],
   "client": [

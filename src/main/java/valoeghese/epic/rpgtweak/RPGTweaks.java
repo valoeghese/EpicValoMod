@@ -20,7 +20,7 @@ public enum RPGTweaks implements AreaTransformer0 {
 
 	private static LazyArea ds;
 
-	public static BinaryOperator<Integer> difficultySupplier = (x, y) -> {
-		return ds.get(x >> 2, y >> 2);
+	public static BinaryOperator<Integer> difficultySupplier = (x, z) -> {
+		return ds.get(x >> 2, z >> 2);
 	};
 }
